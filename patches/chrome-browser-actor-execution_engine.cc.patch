@@ -1,11 +1,11 @@
 diff --git a/chrome/browser/actor/execution_engine.cc b/chrome/browser/actor/execution_engine.cc
-index 2079bcc567ef6c797de83bc5be09b8f8ca973e67..50b51e343d8fb158fa7aafa9908489d93e864ed4 100644
+index 4a790a904162f93625173e44145aeff1f166cb21..46eeae5bb24db009e92f1a621e0a2a47bc9a209c 100644
 --- a/chrome/browser/actor/execution_engine.cc
 +++ b/chrome/browser/actor/execution_engine.cc
-@@ -1385,6 +1385,16 @@ void ExecutionEngine::SafetyChecksForNextAction() {
-   // TODO(mcnee): Add UMA for the outcomes.
-   content::WebContents& web_contents = *(tab->GetContents());
-   const GURL& url = web_contents.GetPrimaryMainFrame()->GetLastCommittedURL();
+@@ -1439,6 +1439,14 @@ void ExecutionEngine::SafetyChecksForNextAction() {
+   content::RenderFrameHost* main_frame = web_contents.GetPrimaryMainFrame();
+   const GURL url = GetEffectiveUrlForGating(
+       main_frame->GetLastCommittedURL(), main_frame->GetLastCommittedOrigin());
 +  BRAVE_MAY_ACT_ON_URL_INTERNAL(
 +      base::BindOnce([](MayActOnUrlBlockReason block_reason) {
 +        return BlockReasonToResultCode(block_reason,
@@ -13,13 +13,11 @@ index 2079bcc567ef6c797de83bc5be09b8f8ca973e67..50b51e343d8fb158fa7aafa9908489d9
 +      })
 +          .Then(base::BindOnce(&ExecutionEngine::DidFinishAsyncSafetyChecks,
 +                               GetActionSequenceWeakPtr(),
-+                               tab->GetContents()
-+                                   ->GetPrimaryMainFrame()
-+                                   ->GetLastCommittedOrigin())))
++                               main_frame->GetLastCommittedOrigin())))
    auto event = GateableEvent::kPageAction;
    GetOriginGatingChecker().ComputeGatingDecision(
        std::make_unique<PageActionGatingContext>(web_contents.GetWeakPtr()),
-@@ -1698,6 +1708,7 @@ const EnterprisePolicyChecker& ExecutionEngine::GetEnterprisePolicyChecker()
+@@ -1750,6 +1758,7 @@ const EnterprisePolicyChecker& ExecutionEngine::GetEnterprisePolicyChecker()
  void ExecutionEngine::IsAcceptableNavigationDestination(
      const GURL& url,
      DecisionCallbackWithReason callback) {
