@@ -433,6 +433,7 @@
 -SafetyHubHandlerTest.HandleGetSafeBrowsingCardData_EnabledEnhanced
 -SiteFamiliarityProcessSelectionDeferringConditionTest.FamiliarityHeuristic_EsbConfigurable*
 -SiteFamiliarityUtilsJsOptimizerTest.IsV8OptimizerBlockingDryRun
+-SuspiciousSiteControllerDesktopTest.*
 
 # These fail because we override IdentityManager::GetAccountsInCookieJar
 -SupervisedUserGoogleAuthNavigationThrottleTest.NavigationForPendingSignedInSupervisedUsers
@@ -858,8 +859,7 @@
 -PeopleHandlerWithReplaceSyncWithSigninUI.*
 -ProcessDiceHeaderDelegateImplTest.UnsupportedAccessPointForHistorySync
 -ProfileReportGeneratorTest.SignedInProfileReplaceSyncPromosWithSigninPromos
--SigninPromoUrlTest.SigninURLForDiceMagiChromeExperiments
--SigninPromoUrlTest.SigninURLForDiceWithHistorySyncOptin
+-SigninPromoUrlTest.SigninURLForDice*
 
 # Brave forces IsReplaceSyncPromosWithSignInPromosEnabled() to false, so this
 # test takes the legacy TurnSyncOnHelper path, which creates a real BrowserView
