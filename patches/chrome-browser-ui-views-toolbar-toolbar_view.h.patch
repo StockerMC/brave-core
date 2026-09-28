@@ -1,8 +1,8 @@
 diff --git a/chrome/browser/ui/views/toolbar/toolbar_view.h b/chrome/browser/ui/views/toolbar/toolbar_view.h
-index 0520c2901223d569f0266421d2e6c6f7dbaff718..8d4d2938cc9882fdabad4f04924f3a68783ffdbb 100644
+index 50e546251e9f8021683a6929593205daefbb0596..8797cd25897eb5d4b59c76a0908f43cf392afe42 100644
 --- a/chrome/browser/ui/views/toolbar/toolbar_view.h
 +++ b/chrome/browser/ui/views/toolbar/toolbar_view.h
-@@ -118,13 +118,13 @@ class ToolbarView : public views::AccessiblePaneView,
+@@ -119,13 +119,13 @@ class ToolbarView : public views::AccessiblePaneView,
    ~ToolbarView() override;
  
    // Create the contents of the Browser Toolbar.
@@ -18,7 +18,7 @@ index 0520c2901223d569f0266421d2e6c6f7dbaff718..8d4d2938cc9882fdabad4f04924f3a68
  
    // Updates the toolbar's visible security state if the state has changed
    // since the last update. Returns true if the toolbar was updated.
-@@ -158,7 +158,7 @@ class ToolbarView : public views::AccessiblePaneView,
+@@ -159,7 +159,7 @@ class ToolbarView : public views::AccessiblePaneView,
        IntentPickerResponse callback);
  
    // Shows a bookmark bubble and anchors it appropriately.
@@ -27,7 +27,7 @@ index 0520c2901223d569f0266421d2e6c6f7dbaff718..8d4d2938cc9882fdabad4f04924f3a68
  
    // Returns true if the view is a descendant of the ToolbarView and should be
    // treated as caption area for window dragging purposes.
-@@ -274,6 +274,8 @@ class ToolbarView : public views::AccessiblePaneView,
+@@ -277,6 +277,8 @@ class ToolbarView : public views::AccessiblePaneView,
    // Updates glic button parenting after hiding glic actor task icon.
    void FinalizeHideGlicActorTaskIcon();
  
@@ -36,7 +36,7 @@ index 0520c2901223d569f0266421d2e6c6f7dbaff718..8d4d2938cc9882fdabad4f04924f3a68
   protected:
    // This controls Toolbar, LocationBar and CustomTabBar visibility.
    // If we don't set all three, tab navigation from the app menu breaks
-@@ -281,6 +283,9 @@ class ToolbarView : public views::AccessiblePaneView,
+@@ -284,6 +286,9 @@ class ToolbarView : public views::AccessiblePaneView,
    void SetToolbarVisibility(bool visible);
  
   private:
@@ -46,7 +46,7 @@ index 0520c2901223d569f0266421d2e6c6f7dbaff718..8d4d2938cc9882fdabad4f04924f3a68
    FRIEND_TEST_ALL_PREFIXES(ToolbarViewCircularContextualTasksBrowserTest,
                             CircularButtonRetainsInteriorMarginsAndPosition);
    FRIEND_TEST_ALL_PREFIXES(ToolbarViewCircularContextualTasksBrowserTest,
-@@ -359,7 +364,7 @@ class ToolbarView : public views::AccessiblePaneView,
+@@ -362,7 +367,7 @@ class ToolbarView : public views::AccessiblePaneView,
    void OnChromeLabsPrefChanged();
  
    // Loads the images for all the child views.

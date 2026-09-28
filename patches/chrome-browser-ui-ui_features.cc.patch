@@ -1,5 +1,5 @@
 diff --git a/chrome/browser/ui/ui_features.cc b/chrome/browser/ui/ui_features.cc
-index 203a500101b0314922e2a4cdf98be17b47f6d675..7220c44bbb27269e3d300d001831a9dfb77945a5 100644
+index ae6a9bc761cf63b642ff411f54e6ac212a2fa21b..b2ad6c552054dc99e4fa827ed9fdb341b865e1ff 100644
 --- a/chrome/browser/ui/ui_features.cc
 +++ b/chrome/browser/ui/ui_features.cc
 @@ -130,7 +130,7 @@ BASE_FEATURE(kFeedbackDisabledDialog, base::FEATURE_DISABLED_BY_DEFAULT);

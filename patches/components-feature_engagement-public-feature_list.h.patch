@@ -1,8 +1,8 @@
 diff --git a/components/feature_engagement/public/feature_list.h b/components/feature_engagement/public/feature_list.h
-index 3ae5f7b58a85893b262d4a61aea873df9042216f..72c7f980a9d26ef49ac12d9840398b61d745c016 100644
+index dae381d3c07f13f437de105de436323a900a275c..69a56203a6fdb2b6373d584268166dadb5eaa805 100644
 --- a/components/feature_engagement/public/feature_list.h
 +++ b/components/feature_engagement/public/feature_list.h
-@@ -646,6 +646,7 @@ DEFINE_VARIATION_PARAM(kIPHiOSTabGroupsDesktopFeature,
+@@ -649,6 +649,7 @@ DEFINE_VARIATION_PARAM(kIPHiOSTabGroupsDesktopFeature,
  DEFINE_VARIATION_PARAM(kIPHiOSPriceTrackingDesktopFeature,
                         "IPH_iOSPriceTrackingDesktop");
  #endif  // !BUILDFLAG(IS_ANDROID)
@@ -10,7 +10,7 @@ index 3ae5f7b58a85893b262d4a61aea873df9042216f..72c7f980a9d26ef49ac12d9840398b61
  
  #if !BUILDFLAG(IS_IOS)
  DEFINE_VARIATION_PARAM(kIPHResumptionRailFeature, "IPH_ResumptionRail");
-@@ -667,6 +668,7 @@ DEFINE_VARIATION_PARAM(kIPHExtensionsPinnedByDefaultFeature,
+@@ -670,6 +671,7 @@ DEFINE_VARIATION_PARAM(kIPHExtensionsPinnedByDefaultFeature,
  inline constexpr flags_ui::FeatureEntry::FeatureVariation
      kIPHDemoModeChoiceVariations[] = {
  // clang-format off

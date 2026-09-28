@@ -1,5 +1,5 @@
 diff --git a/remoting/host/installer/linux/installer.include b/remoting/host/installer/linux/installer.include
-index f15e21e7b04d8d69983cc7a4c8546188ae32180d..f6745d45c9fa67f1e627300df06c7aa2b5ed4ad6 100644
+index f27f44ed2eb07efdc093077dee6628d547117025..14dbda86274b0c96aac0ffb2be5c97c02431c12f 100644
 --- a/remoting/host/installer/linux/installer.include
 +++ b/remoting/host/installer/linux/installer.include
 @@ -147,6 +147,8 @@ stage_install_common() {
