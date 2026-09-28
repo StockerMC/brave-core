@@ -222,6 +222,17 @@ bool BraveBrowserCommandController::SupportsCommand(int id) const {
 }
 
 bool BraveBrowserCommandController::IsCommandEnabled(int id) const {
+  if (id == IDC_COMMANDER) {
+    // When the display mode of the toolbar isn't normal, the omnibox is set to
+    // readonly. This is checked here as the browser view isn't not fully
+    // initialized in InitBraveCommandState().
+    return brave_command_updater_.IsCommandEnabled(id) &&
+           BraveBrowserView::GetBrowserViewForBrowser(
+               base::to_address(browser_))
+                   ->toolbar()
+                   ->display_mode() == ToolbarView::DisplayMode::kNormal;
+  }
+
   return IsBraveCommands(id) ? brave_command_updater_.IsCommandEnabled(id)
                              : BrowserCommandController::IsCommandEnabled(id);
 }
