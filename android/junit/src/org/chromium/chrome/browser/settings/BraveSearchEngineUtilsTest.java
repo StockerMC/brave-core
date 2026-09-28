@@ -12,8 +12,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import androidx.test.filters.SmallTest;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -154,7 +152,6 @@ public class BraveSearchEngineUtilsTest {
     }
 
     @Test
-    @SmallTest
     public void testInitializeOnProfileAddedSkipsWhenAlreadyInitialized() {
         ChromeSharedPreferences.getInstance()
                 .writeString(BraveSearchEngineAdapter.STANDARD_DSE_SHORTNAME, GOOGLE_SEARCH_ENGINE);
@@ -172,7 +169,6 @@ public class BraveSearchEngineUtilsTest {
     }
 
     @Test
-    @SmallTest
     public void testInitializeOnProfileAddedIgnoresOffTheRecordProfile() {
         when(mProfile.isOffTheRecord()).thenReturn(true);
 
@@ -185,7 +181,6 @@ public class BraveSearchEngineUtilsTest {
     }
 
     @Test
-    @SmallTest
     public void testApplySearchChoiceScreenDefaultKeepsUserSelection() {
         // The referrer fetch is retried on later launches, by which point the user may have
         // chosen an engine. That selection must win over the Search Choice Screen.
@@ -203,7 +198,6 @@ public class BraveSearchEngineUtilsTest {
     }
 
     @Test
-    @SmallTest
     public void testNullProfileIsIgnored() {
         BraveSearchEngineUtils.initializeOnProfileAdded(null);
         BraveSearchEngineUtils.applySearchChoiceScreenDefault(null);
