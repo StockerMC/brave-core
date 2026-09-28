@@ -4,8 +4,15 @@
  * You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 #include <optional>
+#include <string>
+#include <vector>
 
+#include "base/strings/sys_string_conversions.h"
 #import "brave/ios/testing/mojom_objc_generator_test.mojom.objc+private.h"
+#include "ios/web/public/test/web_task_environment.h"
+#include "mojo/public/cpp/bindings/pending_remote.h"
+#include "mojo/public/cpp/bindings/receiver.h"
+#include "mojo/public/cpp/bindings/remote_set.h"
 #import "testing/gtest/include/gtest/gtest.h"
 #import "testing/gtest_mac.h"
 #import "testing/platform_test.h"
@@ -144,4 +151,166 @@ TEST_F(MojomObjcGeneratorEmptyResponseTest,
     completionCalled = YES;
   }];
   EXPECT_TRUE(completionCalled);
+}
+
+namespace {
+
+class TestEventSource : public mojom_objc_test::mojom::EventSource {
+ public:
+  TestEventSource() = default;
+  ~TestEventSource() override = default;
+
+  mojo::PendingRemote<mojom_objc_test::mojom::EventSource> BindNewRemote() {
+    return receiver_.BindNewPipeAndPassRemote();
+  }
+
+  void Notify(const std::string& value) {
+    for (auto& observer : observers_) {
+      observer->OnEvent(value);
+    }
+  }
+
+  void ClearObservers() { observers_.Clear(); }
+
+  size_t observer_count() const { return observers_.size(); }
+
+  // mojom::EventSource:
+  void AddObserver(mojo::PendingRemote<mojom_objc_test::mojom::EventObserver>
+                       observer) override {
+    observers_.Add(std::move(observer));
+  }
+
+ private:
+  mojo::Receiver<mojom_objc_test::mojom::EventSource> receiver_{this};
+  mojo::RemoteSet<mojom_objc_test::mojom::EventObserver> observers_;
+};
+
+}  // namespace
+
+class MojomObjcGeneratorPendingRemoteTest : public PlatformTest {
+ protected:
+  void SetUp() override {
+    PlatformTest::SetUp();
+    event_source_ = [[MojomObjcTestEventSourceMojoImpl alloc]
+        initWithEventSource:impl_.BindNewRemote()];
+  }
+
+  void TearDown() override {
+    event_source_ = nil;
+    task_environment_.RunUntilIdle();
+    PlatformTest::TearDown();
+  }
+
+  web::WebTaskEnvironment task_environment_;
+  TestEventSource impl_;
+  MojomObjcTestEventSourceMojoImpl* event_source_ = nil;
+};
+
+TEST_F(MojomObjcGeneratorPendingRemoteTest, ForwardsMessagesToObserver) {
+  __block std::vector<std::string> received;
+  MojomObjcTestTestEventObserver* observer =
+      [[MojomObjcTestTestEventObserver alloc] init];
+  observer._onEvent = ^(NSString* value) {
+    received.push_back(base::SysNSStringToUTF8(value));
+  };
+
+  [event_source_ addObserver:observer];
+  task_environment_.RunUntilIdle();
+  EXPECT_EQ(impl_.observer_count(), 1u);
+
+  impl_.Notify("hello");
+  task_environment_.RunUntilIdle();
+  EXPECT_EQ(received, std::vector<std::string>{"hello"});
+}
+
+// The C++ side should see the remote disconnect once the Obj-C observer is
+// deallocated.
+TEST_F(MojomObjcGeneratorPendingRemoteTest,
+       DeallocatingObserverDisconnectsRemote) {
+  __weak MojomObjcTestTestEventObserver* weak_observer = nil;
+  @autoreleasepool {
+    MojomObjcTestTestEventObserver* observer =
+        [[MojomObjcTestTestEventObserver alloc] init];
+    observer._onEvent = ^(NSString* value) {
+    };
+    weak_observer = observer;
+    [event_source_ addObserver:observer];
+    task_environment_.RunUntilIdle();
+    EXPECT_EQ(impl_.observer_count(), 1u);
+  }
+  EXPECT_EQ(weak_observer, nil);
+
+  task_environment_.RunUntilIdle();
+  EXPECT_EQ(impl_.observer_count(), 0u);
+
+  // Notifying after the observer is gone should be a no-op.
+  impl_.Notify("hello");
+  task_environment_.RunUntilIdle();
+}
+
+TEST_F(MojomObjcGeneratorPendingRemoteTest,
+       SameObserverCanBeAddedMultipleTimes) {
+  __block int call_count = 0;
+  MojomObjcTestTestEventObserver* observer =
+      [[MojomObjcTestTestEventObserver alloc] init];
+  observer._onEvent = ^(NSString* value) {
+    call_count++;
+  };
+
+  [event_source_ addObserver:observer];
+  [event_source_ addObserver:observer];
+  task_environment_.RunUntilIdle();
+  EXPECT_EQ(impl_.observer_count(), 2u);
+
+  impl_.Notify("hello");
+  task_environment_.RunUntilIdle();
+  EXPECT_EQ(call_count, 2);
+}
+
+// Dropping the remote on the C++ side releases the bridge without requiring
+// the Obj-C observer to be deallocated.
+TEST_F(MojomObjcGeneratorPendingRemoteTest, RemoteDisconnectReleasesBridge) {
+  __block int call_count = 0;
+  MojomObjcTestTestEventObserver* observer =
+      [[MojomObjcTestTestEventObserver alloc] init];
+  observer._onEvent = ^(NSString* value) {
+    call_count++;
+  };
+
+  [event_source_ addObserver:observer];
+  task_environment_.RunUntilIdle();
+  EXPECT_EQ(impl_.observer_count(), 1u);
+
+  impl_.ClearObservers();
+  task_environment_.RunUntilIdle();
+
+  // Registering again after a disconnect still works.
+  [event_source_ addObserver:observer];
+  task_environment_.RunUntilIdle();
+  impl_.Notify("hello");
+  task_environment_.RunUntilIdle();
+  EXPECT_EQ(call_count, 1);
+}
+
+// The observer's registration is independent of the lifetime of the Obj-C
+// wrapper it was registered through.
+TEST_F(MojomObjcGeneratorPendingRemoteTest, ObserverOutlivesMojoImpl) {
+  __block int call_count = 0;
+  MojomObjcTestTestEventObserver* observer =
+      [[MojomObjcTestTestEventObserver alloc] init];
+  observer._onEvent = ^(NSString* value) {
+    call_count++;
+  };
+
+  @autoreleasepool {
+    [event_source_ addObserver:observer];
+    task_environment_.RunUntilIdle();
+    event_source_ = nil;
+  }
+  task_environment_.RunUntilIdle();
+  EXPECT_EQ(impl_.observer_count(), 1u);
+
+  impl_.Notify("hello");
+  task_environment_.RunUntilIdle();
+  EXPECT_EQ(call_count, 1);
 }

@@ -78,6 +78,9 @@ source_set("mojom_objc_generator_unit_tests") {
 
   deps = [
     ":mojom_objc_generator_test_mojom_objc",
+    "//base",
+    "//ios/web/public/test",
+    "//mojo/public/cpp/bindings",
     "//testing/gtest",
   ]
 }
