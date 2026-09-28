@@ -1299,18 +1299,6 @@ public class BytecodeTest {
                         Intent.class));
         Assert.assertTrue(
                 methodExists(
-                        "org/chromium/chrome/browser/omnibox/suggestions/AutocompleteMediator",
-                        "loadUrlForOmniboxMatch",
-                        MethodModifier.REGULAR,
-                        void.class,
-                        int.class,
-                        AutocompleteMatch.class,
-                        GURL.class,
-                        long.class,
-                        boolean.class,
-                        boolean.class));
-        Assert.assertTrue(
-                methodExists(
                         "org/chromium/chrome/browser/ui/appmenu/AppMenuHandlerImpl",
                         "showAppMenu",
                         MethodModifier.REGULAR,
