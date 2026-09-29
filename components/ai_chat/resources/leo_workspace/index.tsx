@@ -14,8 +14,11 @@
 // The handle is delivered via launchQueue; once captured, the file tools are
 // registered with Leo via WebMCP (see tools.ts / file_ops.ts). The `view.`
 // sibling origin can also read files over postMessage (see message_handler.ts).
+//
+// When navigated to with a #file=<path> fragment, the workspace creates a
+// fullscreen iframe to the viewer origin which displays the file content.
 
-import { installMessageHandler } from './message_handler'
+import { installMessageHandler, viewOrigin } from './message_handler'
 import { registerTools } from './tools'
 
 // launchQueue is not in the default TS DOM lib; declare the minimal surface we
@@ -54,14 +57,70 @@ function onLaunch(params: LaunchParams) {
     return
   }
   const root = entry as FileSystemDirectoryHandle
-  console.log('[leo-workspace] received directory handle:', root.name)
+  console.debug('[leo-workspace] received directory handle:', root.name)
   resolveRoot(root)
   void registerTools(root)
 }
 
+// Parses the #file=<filename> fragment from the URL.
+// Returns null if no file fragment is present.
+function parseFileFragment(hash: string): string | null {
+  if (!hash || !hash.startsWith('#')) {
+    return null
+  }
+  const params = new URLSearchParams(hash.slice(1))
+  return params.get('file')
+}
+
+// The viewer iframe, created on demand when a #file= fragment is present.
+let viewerIframe: HTMLIFrameElement | null = null
+
+// Creates or updates the fullscreen viewer iframe.
+function showViewer(filename: string) {
+  const viewerOriginUrl = viewOrigin(window.location.origin)
+  if (!viewerOriginUrl) {
+    console.error('[leo-workspace] cannot determine viewer origin')
+    return
+  }
+
+  // Build the viewer URL with the file fragment
+  const viewerUrl = `${viewerOriginUrl}/#file=${encodeURIComponent(filename)}`
+
+  if (!viewerIframe) {
+    viewerIframe = document.createElement('iframe')
+    document.body.appendChild(viewerIframe)
+  }
+
+  viewerIframe.src = viewerUrl
+  console.debug('[leo-workspace] showing viewer for:', filename)
+}
+
+// Hides the viewer iframe.
+function hideViewer() {
+  if (viewerIframe) {
+    viewerIframe.remove()
+    viewerIframe = null
+  }
+}
+
+// Handles hash changes to show/hide the viewer.
+function handleHashChange() {
+  const filename = parseFileFragment(window.location.hash)
+  if (filename) {
+    showViewer(filename)
+  } else {
+    hideViewer()
+  }
+}
+
 function initialize() {
-  console.log('[leo-workspace] bundle loaded at', window.location.origin)
+  console.debug('[leo-workspace] bundle loaded at', window.location.origin)
   installMessageHandler(rootHandle)
+
+  // Handle file viewing via hash fragment
+  handleHashChange()
+  window.addEventListener('hashchange', handleHashChange)
+
   if (window.launchQueue) {
     window.launchQueue.setConsumer(onLaunch)
   } else {
